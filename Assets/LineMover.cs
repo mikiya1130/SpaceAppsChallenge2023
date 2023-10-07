@@ -1,76 +1,78 @@
-using UnityEngine;
-using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEngine;
 
-public class LineMover : MonoBehaviour
+public class MoveOnLine : MonoBehaviour
 {
-    private LineRenderer lineRenderer;
-    [SerializeField] private float speed = 1f;
+    private LineRenderer lineComponent = null;
+    [SerializeField, Tooltip("速度[m/sec]")] float speed = 1.5f;
+    int lineComponentPtr;
+    float[] costs;
+    float remain;
 
-    private int currentIndex;
-    public EventHandler OnEndReached;
-    private Vector3 previous_position;
-
-    private void Start()
+    // Start is called before the first frame update
+    void Start()
     {
-        int[] values = {1, 4, 3, 5, 2, 6};
-        lineRenderer = generateLineRenderer(values);
-        Initialize(0,speed,lineRenderer);
-        previous_position = transform.position;
-    }
-    public void Initialize(int index, float speed, LineRenderer lineRenderer)
-    {
-        enabled = true;
-        currentIndex = index;
-        this.speed = speed;
-        this.lineRenderer = lineRenderer;
-        transform.position = this.lineRenderer.GetPosition(currentIndex);
+        int[] values = { 0, 230, 100, 50, 200, 210 };
+        lineComponent = generateLineRenderer(values);
+        init();
     }
 
-    public static (Vector3 targetPosition, bool isEnd) GetTargetPosition(ref int index, float moveSpeed, Vector3 currentPosition, LineRenderer lineRenderer)
+    // Update is called once per frame
+    void Update()
     {
-        int nextIndex = index + 1;
+        float delta = speed * Time.deltaTime;
+        while (delta > 0f)
+        {
+            if (remain > delta)
+            {
+                remain -= delta;
+                delta = 0f;
+                break;
+            }
+            else
+            {
+                delta -= remain;
+                lineComponentPtr = (lineComponentPtr + 1) % lineComponent.positionCount;
+                remain = costs[lineComponentPtr];
+            }
+        }
+        Vector3 basePos = lineComponent.GetPosition(lineComponentPtr);
+        if (remain > 0f)
+        {
+            float rate = 1f - remain / costs[lineComponentPtr];
+            basePos += (lineComponent.GetPosition((lineComponentPtr + 1) % lineComponent.positionCount) - basePos) * rate;
+        }
+        if (!lineComponent.useWorldSpace)
+        {
+            basePos = lineComponent.transform.position + Vector3.Scale(lineComponent.transform.rotation * basePos, lineComponent.transform.lossyScale);
+        }
+        transform.position = basePos + new Vector3(0, 0.5f, 0);
+        Camera.main.transform.position = new Vector3(transform.position.x, Camera.main.transform.position.y, Camera.main.transform.position.z);
 
-        if (lineRenderer.positionCount <= nextIndex)
-        {
-            return (lineRenderer.GetPosition(index)+ lineRenderer.transform.position, true);
-        }
-        var nextPosition = lineRenderer.GetPosition(nextIndex) + lineRenderer.transform.position;
-
-        float distance = Vector3.Distance(currentPosition, nextPosition);
-
-        if (distance < moveSpeed)
-        {
-            index += 1;
-            return GetTargetPosition(ref index, moveSpeed - distance, nextPosition, lineRenderer);
-        }
-        else
-        {
-            Vector3 direction = (nextPosition - currentPosition).normalized;
-            return (currentPosition + direction * moveSpeed, false);
-        }
-    }
-    private void Update()
-    {
-        var result = GetTargetPosition(
-            ref currentIndex,
-            speed * Time.deltaTime,
-            previous_position,
-            lineRenderer);
-            
-        Vector3 shift = new Vector3(0.0f, 1.0f, 0.0f); 
-        previous_position = result.targetPosition;
-        transform.position = result.targetPosition + shift;
-        if (result.isEnd)
-        {
-            OnEndReached?.Invoke(this, EventArgs.Empty);
-            enabled = false;
-        }
     }
 
-    private LineRenderer generateLineRenderer(int[] values){
+    private void init()
+    {
+        costs = new float[lineComponent.positionCount];
+        Vector3 pos = lineComponent.GetPosition(0);
+        for (int i = 0; i < lineComponent.positionCount; ++i)
+        {
+            Vector3 nextPos = lineComponent.GetPosition((i + 1) % lineComponent.positionCount);
+            costs[i] = (nextPos - pos).magnitude;
+            pos = nextPos;
+        }
+        if (!lineComponent.loop)
+        {
+            costs[lineComponent.positionCount - 1] = 0f;
+        }
+        lineComponentPtr = 0;
+        remain = costs[0];
+    }
 
+    private LineRenderer generateLineRenderer(int[] values)
+    {
         // LineRendererコンポーネントをゲームオブジェクトにアタッチする
         var lineRenderer = gameObject.AddComponent<LineRenderer>();
 
@@ -79,7 +81,7 @@ public class LineMover : MonoBehaviour
         lineRenderer.endWidth = 0.1f;
 
         List<int> indexes = Enumerable.Range(0, values.Length).ToList();
-        Vector3[] positions = indexes.Select(i => new Vector3(i, values[i], 0.0f)).ToArray();
+        Vector3[] positions = indexes.Select(i => new Vector3(i * 2.5f, ((values[i] / 255.0f) * 5.0f) - 2.5f, 0.0f)).ToArray();
 
         lineRenderer.positionCount = positions.Length;
 
