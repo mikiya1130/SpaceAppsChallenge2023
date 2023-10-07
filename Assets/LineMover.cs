@@ -22,10 +22,8 @@ public class MoveOnLine : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-
         // LineRenderer上を動く点については、以下のURLを参照
         // @see https://qiita.com/ELIXIR/items/2661a2ed72eb0ae2a0fc
-
         float delta = speed * Time.deltaTime;
         while (delta > 0f)
         {
@@ -86,7 +84,6 @@ public class MoveOnLine : MonoBehaviour
     {
         // LineRendererコンポーネントをゲームオブジェクトにアタッチする
         var lineRenderer = GetComponent<LineRenderer>();
-
         List<int> indexes = Enumerable.Range(0, values.Length).ToList();
         Vector3[] positions = indexes.Select(i => new Vector3(i * 2.5f, ((values[i] / 255.0f) * 5.0f) - 2.5f, 0.0f)).ToArray();
         lineRenderer.positionCount = positions.Length;
