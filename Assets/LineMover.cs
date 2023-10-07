@@ -41,6 +41,7 @@ public class MoveOnLine : MonoBehaviour
         Vector3 basePos = lineComponent.GetPosition(lineComponentPtr);
         if (remain > 0f)
         {
+
             float rate = 1f - remain / costs[lineComponentPtr];
             basePos += (lineComponent.GetPosition((lineComponentPtr + 1) % lineComponent.positionCount) - basePos) * rate;
         }
@@ -48,9 +49,15 @@ public class MoveOnLine : MonoBehaviour
         {
             basePos = lineComponent.transform.position + Vector3.Scale(lineComponent.transform.rotation * basePos, lineComponent.transform.lossyScale);
         }
-        transform.position = basePos + new Vector3(0, 0.5f, 0);
-        Camera.main.transform.position = new Vector3(transform.position.x, Camera.main.transform.position.y, Camera.main.transform.position.z);
 
+        // 角度を決める
+        Vector2 dt = lineComponent.GetPosition(lineComponentPtr + 1) - basePos;
+        float rad = Mathf.Atan2(dt.y, dt.x);
+        float degree = rad * Mathf.Rad2Deg;
+        // 線形補間しながら角度をつける
+        transform.rotation = Quaternion.Lerp(transform.rotation, Quaternion.Euler(transform.rotation.x, transform.rotation.y, degree), 10.0f * Time.deltaTime);
+        transform.position = basePos;
+        Camera.main.transform.position = new Vector3(transform.position.x, Camera.main.transform.position.y, Camera.main.transform.position.z);
     }
 
     private void init()
@@ -87,8 +94,6 @@ public class MoveOnLine : MonoBehaviour
 
         // 線を引く場所を指定する
         lineRenderer.SetPositions(positions);
-
         return lineRenderer;
-
     }
 }
