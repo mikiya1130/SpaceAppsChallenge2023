@@ -14,7 +14,7 @@ public class MoveOnLine : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        int[] values = { 0, 230, 100, 50, 200, 210 };
+        int[] values = Enumerable.Range(0, 100).ToList().Select(_ => Random.Range(0, 255)).ToArray();
         lineComponent = generateLineRenderer(values);
         init();
     }
@@ -22,6 +22,10 @@ public class MoveOnLine : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+
+        // LineRenderer上を動く点については、以下のURLを参照
+        // @see https://qiita.com/ELIXIR/items/2661a2ed72eb0ae2a0fc
+
         float delta = speed * Time.deltaTime;
         while (delta > 0f)
         {
@@ -81,17 +85,11 @@ public class MoveOnLine : MonoBehaviour
     private LineRenderer generateLineRenderer(int[] values)
     {
         // LineRendererコンポーネントをゲームオブジェクトにアタッチする
-        var lineRenderer = gameObject.AddComponent<LineRenderer>();
-
-        //線の幅を設定
-        lineRenderer.startWidth = 0.1f;
-        lineRenderer.endWidth = 0.1f;
+        var lineRenderer = GetComponent<LineRenderer>();
 
         List<int> indexes = Enumerable.Range(0, values.Length).ToList();
         Vector3[] positions = indexes.Select(i => new Vector3(i * 2.5f, ((values[i] / 255.0f) * 5.0f) - 2.5f, 0.0f)).ToArray();
-
         lineRenderer.positionCount = positions.Length;
-
         // 線を引く場所を指定する
         lineRenderer.SetPositions(positions);
         return lineRenderer;
