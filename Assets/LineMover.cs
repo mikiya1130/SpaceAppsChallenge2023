@@ -6,7 +6,9 @@ using UnityEngine;
 public class MoveOnLine : MonoBehaviour
 {
     private LineRenderer lineComponent = null;
-    [SerializeField, Tooltip("速度[m/sec]")] float speed = 1.5f;
+    [SerializeField, Tooltip("最高速度[m/sec]")] float maxSpeed = 6.0f;
+    [SerializeField, Tooltip("加速度[m/s2]")] float acceleration = 0.005f;
+    float speed = 0f;
     int lineComponentPtr;
     float[] costs;
     float remain;
@@ -23,6 +25,11 @@ public class MoveOnLine : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        speed += acceleration;
+        if (maxSpeed < speed)
+        {
+            speed = maxSpeed;
+        }
         // LineRenderer上を動く点については、以下のURLを参照
         // @see https://qiita.com/ELIXIR/items/2661a2ed72eb0ae2a0fc
         float delta = speed * Time.deltaTime;
