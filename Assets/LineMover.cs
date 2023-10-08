@@ -14,13 +14,13 @@ public class MoveOnLine : MonoBehaviour
     float[] costs;
     float remain;
     Vector3 vibrationPosition = new Vector3(0f, 0f, 0f);
+    public TextAsset[] dataList;
+    public int curentDataset = 0;
 
     // Start is called before the first frame update
     void Start()
     {
-        int[] values = Enumerable.Range(0, 100).ToList().Select(_ => Random.Range(0, 255)).ToArray();
-        float[] rescaleValues = RescaleValues.rescale(values);
-        lineComponent = generateLineRenderer(rescaleValues);
+        lineComponent = generateLineRenderer(curentDataset);
         init();
     }
 
@@ -63,13 +63,17 @@ public class MoveOnLine : MonoBehaviour
             {
                 delta -= remain;
                 lineComponentPtr = (lineComponentPtr + 1) % lineComponent.positionCount;
+                if (lineComponentPtr == 0)
+                {
+                    curentDataset = (curentDataset + 1) % dataList.Count();
+                    lineComponent = generateLineRenderer(curentDataset);
+                }
                 remain = costs[lineComponentPtr];
             }
         }
         Vector3 basePos = lineComponent.GetPosition(lineComponentPtr);
         if (remain > 0f)
         {
-
             float rate = 1f - remain / costs[lineComponentPtr];
             basePos += (lineComponent.GetPosition((lineComponentPtr + 1) % lineComponent.positionCount) - basePos) * rate;
         }
@@ -111,12 +115,14 @@ public class MoveOnLine : MonoBehaviour
         remain = costs[0];
     }
 
-    private LineRenderer generateLineRenderer(float[] values)
+    private LineRenderer generateLineRenderer(int num)
     {
+        int[] values = dataList[num].text.Split(',').Select(int.Parse).ToArray();
+        float[] rescaleValues = RescaleValues.rescale(values);
         // LineRendererコンポーネントをゲームオブジェクトにアタッチする
         var lineRenderer = GetComponent<LineRenderer>();
-        List<int> indexes = Enumerable.Range(0, values.Length).ToList();
-        Vector3[] positions = indexes.Select(i => new Vector3(i * 2.5f, values[i] - 2.5f, 0.0f)).ToArray();
+        List<int> indexes = Enumerable.Range(0, rescaleValues.Length).ToList();
+        Vector3[] positions = indexes.Select(i => new Vector3(i * 1.5f, rescaleValues[i] - 2.5f, 0.0f)).ToArray();
         lineRenderer.positionCount = positions.Length;
         // 線を引く場所を指定する
         lineRenderer.SetPositions(positions);
