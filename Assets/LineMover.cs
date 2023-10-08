@@ -15,7 +15,7 @@ public class MoveOnLine : MonoBehaviour
     float remain;
     Vector3 vibrationPosition = new Vector3(0f, 0f, 0f);
     public TextAsset[] dataList;
-    private int curentDataset = 0;
+    public int curentDataset = 0;
 
     // Start is called before the first frame update
     void Start()
@@ -122,7 +122,7 @@ public class MoveOnLine : MonoBehaviour
         // LineRendererコンポーネントをゲームオブジェクトにアタッチする
         var lineRenderer = GetComponent<LineRenderer>();
         List<int> indexes = Enumerable.Range(0, rescaleValues.Length).ToList();
-        Vector3[] positions = indexes.Select(i => new Vector3(i * 2.5f, rescaleValues[i] - 2.5f, 0.0f)).ToArray();
+        Vector3[] positions = indexes.Select(i => new Vector3(i * 1.5f, rescaleValues[i] - 2.5f, 0.0f)).ToArray();
         lineRenderer.positionCount = positions.Length;
         // 線を引く場所を指定する
         lineRenderer.SetPositions(positions);
