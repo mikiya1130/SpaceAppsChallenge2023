@@ -8,7 +8,8 @@ public class MoveOnLine : MonoBehaviour
     private LineRenderer lineComponent = null;
     [SerializeField, Tooltip("最高速度[m/sec]")] float maxSpeed = 6.0f;
     [SerializeField, Tooltip("加速度[m/s2]")] float acceleration = 0.005f;
-    float speed = 0f;
+    float speed = 1.5f;
+    float maxRate = 1.0f;
     int lineComponentPtr;
     float[] costs;
     float remain;
@@ -27,10 +28,26 @@ public class MoveOnLine : MonoBehaviour
     void Update()
     {
         speed += acceleration;
-        if (maxSpeed < speed)
+        float z = transform.rotation.z;
+
+        if (z > 0f)
         {
-            speed = maxSpeed;
+            float rate = z / 0.5f;
+            if (rate > 1.0f) rate = 1.0f;
+            maxRate = 1.0f - (rate * 0.35f);
         }
+        else
+        {
+            float rate = -z / 0.5f;
+            if (rate > 1.0f) rate = 1.0f;
+            maxRate = 1.0f + (rate * 0.35f);
+        }
+
+        if (maxSpeed * maxRate < speed)
+        {
+            speed = maxSpeed * maxRate;
+        }
+
         // LineRenderer上を動く点については、以下のURLを参照
         // @see https://qiita.com/ELIXIR/items/2661a2ed72eb0ae2a0fc
         float delta = speed * Time.deltaTime;
