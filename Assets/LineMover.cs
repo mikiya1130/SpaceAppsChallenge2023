@@ -18,7 +18,8 @@ public class MoveOnLine : MonoBehaviour
     void Start()
     {
         int[] values = Enumerable.Range(0, 100).ToList().Select(_ => Random.Range(0, 255)).ToArray();
-        lineComponent = generateLineRenderer(values);
+        float[] rescaleValues = RescaleValues.rescale(values);
+        lineComponent = generateLineRenderer(rescaleValues);
         init();
     }
 
@@ -93,12 +94,12 @@ public class MoveOnLine : MonoBehaviour
         remain = costs[0];
     }
 
-    private LineRenderer generateLineRenderer(int[] values)
+    private LineRenderer generateLineRenderer(float[] values)
     {
         // LineRendererコンポーネントをゲームオブジェクトにアタッチする
         var lineRenderer = GetComponent<LineRenderer>();
         List<int> indexes = Enumerable.Range(0, values.Length).ToList();
-        Vector3[] positions = indexes.Select(i => new Vector3(i * 2.5f, ((values[i] / 255.0f) * 5.0f) - 2.5f, 0.0f)).ToArray();
+        Vector3[] positions = indexes.Select(i => new Vector3(i * 2.5f, values[i] - 2.5f, 0.0f)).ToArray();
         lineRenderer.positionCount = positions.Length;
         // 線を引く場所を指定する
         lineRenderer.SetPositions(positions);
