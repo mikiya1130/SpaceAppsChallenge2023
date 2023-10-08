@@ -10,6 +10,7 @@ public class MoveOnLine : MonoBehaviour
     int lineComponentPtr;
     float[] costs;
     float remain;
+    Vector3 vibrationPosition = new Vector3(0f, 0f, 0f);
 
     // Start is called before the first frame update
     void Start()
@@ -58,7 +59,12 @@ public class MoveOnLine : MonoBehaviour
         float degree = rad * Mathf.Rad2Deg;
         // 線形補間しながら角度をつける
         transform.rotation = Quaternion.Lerp(transform.rotation, Quaternion.Euler(transform.rotation.x, transform.rotation.y, degree), 10.0f * Time.deltaTime);
-        transform.position = basePos;
+
+
+        float ry = Random.Range(-0.05f, 0.05f);
+        vibrationPosition = new Vector3(0, ry, 0);
+
+        transform.position = basePos + vibrationPosition;
         Camera.main.transform.position = new Vector3(transform.position.x, Camera.main.transform.position.y, Camera.main.transform.position.z);
     }
 
