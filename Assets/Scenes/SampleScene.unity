@@ -156,6 +156,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   maxSpeed: 6.5
   acceleration: 0.05
+  dataList:
+  - {fileID: 4900000, guid: 93896e83ec9244da4893ce2f6c17b9d5, type: 3}
+  - {fileID: 4900000, guid: cca9bd8b745fd4c07b25a6be4a796553, type: 3}
 --- !u!212 &279984892
 SpriteRenderer:
   m_ObjectHideFlags: 0
